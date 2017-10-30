@@ -11,7 +11,7 @@ LUTSUIT(TestSuit) {
       ASSERT(True, true);
     };
     LUTCASE(NestedCaseB) {
-      ASSERT(False, false);
+      ASSERT(False, true);
     };
   };
 };

@@ -1,9 +1,8 @@
 #pragma once
 
 #include <string>
-#include <functional>
-#include <iostream>
 #include <sstream>
+#include <iostream>
 #include <unordered_map>
 
 namespace lambda_ut {
@@ -54,7 +53,7 @@ namespace __lambda_ut {
     }
   };
   template<typename Functor>
-  lutResult operator<<( TestData& testData, Functor &&functor ) {
+  lutResult operator<<( TestData& testData, Functor&& functor ) {
     printCaseState( testData.name, START );
     bool result = true;
     try {
@@ -73,17 +72,12 @@ namespace __lambda_ut {
   lutResult operator<<( TestData&& testData, Functor &&functor ) {
     return testData << functor;
   }
-  struct TestSuit : public TestData {
-    function<void(TestData&)> scope;
-    TestSuit(string name) : TestData(move(name)) {}
-    lutResult operator()() {
-      return *this << scope;
-    }
-    TestSuit operator <<=(function<void(TestData&)> scope) {
-      this->scope = scope;
-      return *this;
-    }
-  };
+  template<typename Functor>
+  auto operator|( TestData&& testData, Functor&& functor ) {
+    return [=]() mutable {
+      testData << functor;
+    };
+  }
   template <typename T>
   std::string toString(const T& val) {
     stringstream out;
@@ -110,7 +104,7 @@ lutResult False(bool val) { return Eq(false, val); }
 } // namespace lambda_ut
 namespace __lut = lambda_ut::__lambda_ut;
 
-#define LUTSUIT(NAME) auto __lutSuit_##NAME = __lut::TestSuit(#NAME) <<= [&](__lut::TestData& __lutSpace)
+#define LUTSUIT(NAME) auto __lutSuit_##NAME = __lut::TestData(#NAME) | [&](__lut::TestData& __lutSpace)
 
 #define LUTSUIT_RUN(NAME) __lutSuit_##NAME();
 
