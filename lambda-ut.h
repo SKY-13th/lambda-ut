@@ -38,7 +38,7 @@ namespace __lambda_ut {
     bool operator += ( lutResult&& result ) {
       state.emplace(result);
     }
-    void printResult( bool result ) {
+    void printResult( bool result ) const {
       size_t succeeded = 0;
       if(state.empty()) {
         printCaseState(name, result ? SUCCESS : FAILURE);
@@ -50,11 +50,11 @@ namespace __lambda_ut {
                          ? SUCCESS : FAILURE);
       cout << "          Succeeded "
            << succeeded    << " of "
-           << state.size() << "\n\n";
+           << state.size() << endl;
     }
   };
   template<typename Functor>
-  lutResult operator<<( TestData&& testData, Functor &&functor ) {
+  lutResult operator<<( TestData& testData, Functor &&functor ) {
     printCaseState( testData.name, START );
     bool result = true;
     try {
@@ -69,6 +69,21 @@ namespace __lambda_ut {
     testData.printResult(result);
     return make_pair( testData.name, result );
   }
+  template<typename Functor>
+  lutResult operator<<( TestData&& testData, Functor &&functor ) {
+    return testData << functor;
+  }
+  struct TestSuit : public TestData {
+    function<void(TestData&)> scope;
+    TestSuit(string name) : TestData(move(name)) {}
+    lutResult operator()() {
+      return *this << scope;
+    }
+    TestSuit operator <<=(function<void(TestData&)> scope) {
+      this->scope = scope;
+      return *this;
+    }
+  };
   template <typename T>
   std::string toString(const T& val) {
     stringstream out;
@@ -95,10 +110,7 @@ lutResult False(bool val) { return Eq(false, val); }
 } // namespace lambda_ut
 namespace __lut = lambda_ut::__lambda_ut;
 
-#define LUTROOT(NAME) __lut::TestData __lutSpace(#NAME);
-
-#define LUTSUIT(NAME) LUTROOT(NAME) \
-const auto __lutSuit_##NAME = [&]()
+#define LUTSUIT(NAME) auto __lutSuit_##NAME = __lut::TestSuit(#NAME) <<= [&](__lut::TestData& __lutSpace)
 
 #define LUTSUIT_RUN(NAME) __lutSuit_##NAME();
 

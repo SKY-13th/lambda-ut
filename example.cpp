@@ -2,30 +2,21 @@
 
 using namespace lambda_ut;
 
-LUTSUIT(TestSuitA) {
+LUTSUIT(TestSuit) {
   LUTCASE(CaseA) {
     ASSERT(Eq, 100, 100);
   };
-  LUTCASE(CaseB) {};
-};
-
-void testSuitB() {
-  LUTROOT(TestSuitB);
-
-  LUTCASE(CaseA) {
+  LUTCASE(CaseB) {
     LUTCASE(NestedCaseA) {
       ASSERT(True, true);
     };
-
     LUTCASE(NestedCaseB) {
       ASSERT(False, false);
     };
   };
-}
+};
 
 int main() {
-  LUTSUIT_RUN(TestSuitA);
-  std::cout << "\n";
-  testSuitB();
+  LUTSUIT_RUN(TestSuit);
   return 0;
 }
