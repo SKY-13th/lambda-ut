@@ -25,6 +25,7 @@ void testSuitB() {
 
 int main() {
   LUTSUIT_RUN(TestSuitA);
+  std::cout << "\n";
   testSuitB();
   return 0;
 }
