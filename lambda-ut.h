@@ -38,9 +38,6 @@ namespace __lambda_ut {
     bool operator += ( lutResult&& result ) {
       state.emplace(result);
     }
-  };
-  struct TestCase : public TestData {
-    TestCase( string name ) : TestData( move( name ) ) {}
     void printResult( bool result ) {
       size_t succeeded = 0;
       if(state.empty()) {
@@ -55,23 +52,23 @@ namespace __lambda_ut {
            << succeeded    << " of "
            << state.size() << "\n\n";
     }
-    template<typename Functor>
-    lutResult operator<<( Functor &&functor ) {
-      printCaseState(this->name, START);
-      bool result = true;
-      try {
-        functor( *this );
-      } catch ( const TestAssertion& ex ) {
-        printError( name, ex.what() );
-        result = false;
-      } catch(...) {
-        printError( name, "Unexpected exception!!!" );
-        result = false;
-      }
-      printResult(result);
-      return make_pair( name, result );
-    }
   };
+  template<typename Functor>
+  lutResult operator<<( TestData&& testData, Functor &&functor ) {
+    printCaseState( testData.name, START );
+    bool result = true;
+    try {
+      functor( testData );
+    } catch ( const TestAssertion& ex ) {
+      printError( testData.name, ex.what() );
+      result = false;
+    } catch(...) {
+      printError( testData.name, "Unexpected exception!!!" );
+      result = false;
+    }
+    testData.printResult(result);
+    return make_pair( testData.name, result );
+  }
   template <typename T>
   std::string toString(const T& val) {
     stringstream out;
@@ -106,7 +103,7 @@ const auto __lutSuit_##NAME = [&]()
 #define LUTSUIT_RUN(NAME) __lutSuit_##NAME();
 
 #define LUTCASE(NAME) \
-const bool __lutCase_##NAME = __lutSpace += __lut::TestCase(__lutSpace.name +'.'+ #NAME) << [&](__lut::TestData& __lutSpace)
+const bool __lutCase_##NAME = __lutSpace += __lut::TestData(__lutSpace.name +'.'+ #NAME) << [&](__lut::TestData& __lutSpace)
 
 #define ASSERT(FUNCTOR, ...) {       \
 const auto r = FUNCTOR(__VA_ARGS__); \
