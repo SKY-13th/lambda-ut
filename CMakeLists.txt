@@ -1,1 +1,3 @@
-add_executable(example example.cpp)
+cmake_minimum_required(VERSION 3.8)
+
+add_executable(example example.cpp lambda-ut.h)

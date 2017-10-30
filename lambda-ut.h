@@ -25,6 +25,9 @@ namespace __lambda_ut {
   void printError(const string& caseName, const string& msg) {
     cout << "> ERROR:\n" << msg << endl;
   }
+  void printSucceeded( size_t succeeded, size_t of ) {
+    cout << "          Succeeded " << succeeded << " of " << of << endl;
+  }
   string formatErrorMsg( const string& file, const size_t line, const string& msg ) {
     stringstream out;
     out << "In file: " << file << ":" << line << endl << msg;
@@ -37,19 +40,11 @@ namespace __lambda_ut {
     bool operator += ( lutResult&& result ) {
       state.emplace(result);
     }
-    void printResult( bool result ) const {
+    size_t subCasesPassed() const {
       size_t succeeded = 0;
-      if(state.empty()) {
-        printCaseState(name, result ? SUCCESS : FAILURE);
-        return;
-      }
       for (const auto &s : state)
         succeeded += s.second;
-      printCaseState(name, succeeded == state.size()
-                         ? SUCCESS : FAILURE);
-      cout << "          Succeeded "
-           << succeeded    << " of "
-           << state.size() << endl;
+      return succeeded;
     }
   };
   template<typename Functor>
@@ -65,7 +60,11 @@ namespace __lambda_ut {
       printError( testData.name, "Unexpected exception!!!" );
       result = false;
     }
-    testData.printResult(result);
+    const size_t passed = testData.subCasesPassed();
+    const size_t size   = testData.state.size();
+    result &= passed == size;
+    printCaseState( testData.name, result ? SUCCESS : FAILURE );
+    if (passed < size) printSucceeded( passed, size );
     return make_pair( testData.name, result );
   }
   template<typename Functor>
@@ -75,7 +74,7 @@ namespace __lambda_ut {
   template<typename Functor>
   auto operator|( TestData&& testData, Functor&& functor ) {
     return [=]() mutable {
-      testData << functor;
+      return testData << functor;
     };
   }
   template <typename T>

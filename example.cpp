@@ -6,7 +6,8 @@ LUTSUIT(TestSuit) {
   LUTCASE(CaseA) {
     ASSERT(Eq, 100, 100);
   };
-  LUTCASE(CaseB) {
+  LUTCASE(CaseB) {};
+  LUTCASE(CaseC) {
     LUTCASE(NestedCaseA) {
       ASSERT(True, true);
     };
