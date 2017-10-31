@@ -8,13 +8,9 @@
 
 namespace lambda_ut {
 namespace __lambda_ut {
+namespace {
   using namespace std;
-  using lutResult = std::pair<string, bool>;
   enum CaseState { RUN, PASS, FAIL };
-  struct TestAssertion : public logic_error {
-    TestAssertion(string what)
-        : logic_error(move(what)) {};
-  };
   void printCaseState(const string& caseName, CaseState state) {
     string stateStr;
     switch (state) {
@@ -29,11 +25,17 @@ namespace __lambda_ut {
   void printPassed(size_t passed, size_t ofCount) {
     cout << "       Passed " << passed << " of " << ofCount << endl;
   }
-  string formatErrorMsg( const string& file, const size_t line, const string& msg ) {
+  string formatErrorMsg(const string& file, const size_t line, const string& msg) {
     stringstream out;
     out << "In file: " << file << ":" << line << endl << msg;
     return out.str();
   }
+} // namespace
+  
+  using lutResult = std::pair<string, bool>;
+  struct TestAssertion : public logic_error {
+    TestAssertion(string what) : logic_error(move(what)) {};
+  };
   struct TestData {
     const string name;
     unordered_map<string, bool> state;
@@ -78,28 +80,30 @@ namespace __lambda_ut {
       return testData << functor;
     };
   }
+} // namespace __lambda_ut
+using __lambda_ut::lutResult;
+
+namespace {
   template <typename T>
   std::string toString(const T& val) {
-    stringstream out; out << val;
+    std::stringstream out; out << val;
     return out.str();
   }
   template <>
   std::string toString<bool>(const bool& val) {
     return val ? "true" : "false";
   }
-} // namespace __lambda_ut
-using __lambda_ut::lutResult;
+} // namespace
 
 template <typename A, typename B>
 lutResult Eq(const A& expect, const B& actual) {
   const bool result = expect == actual;
   return std::make_pair( result ? ""
-      : "Expect: "   + __lambda_ut::toString(expect)
-      + ", Actual: " + __lambda_ut::toString(actual), result );
+      : "Expect: "   + toString(expect)
+      + ", Actual: " + toString(actual), result );
 };
 lutResult True (bool val) { return Eq(true, val); }
 lutResult False(bool val) { return Eq(false, val); }
-
 } // namespace lambda_ut
 namespace __lut = lambda_ut::__lambda_ut;
 
