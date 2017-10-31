@@ -107,9 +107,9 @@ lutResult False(bool val) { return Eq(false, val); }
 } // namespace lambda_ut
 namespace __lut = lambda_ut::__lambda_ut;
 
-#define LUTSUIT(NAME) const auto __lutSuit_##NAME = __lut::TestData(#NAME) | [&](__lut::TestData& __lutSpace)
+#define LUTSUITE(NAME) const auto __LUTSUITEe_##NAME = __lut::TestData(#NAME) | [&](__lut::TestData& __lutSpace)
 
-#define LUTSUIT_RUN(NAME) __lutSuit_##NAME();
+#define LUTSUITE_RUN(NAME) __LUTSUITEe_##NAME();
 
 #define LUTCASE(NAME) \
 const bool __lutCase_##NAME = __lutSpace += __lut::TestData(__lutSpace.name +'.'+ #NAME) << [&](__lut::TestData& __lutSpace)

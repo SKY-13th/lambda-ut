@@ -4,20 +4,20 @@ Single header, small, lambda-based, unit test framework for C++
 
 ## Usage:
 
-**`LUTSUIT( NAME )`** - root node to a suit of test cases.
-* **`NAME`** - name of a test suit.
+**`LUTSUITE( NAME )`** - root node to a suite of test cases.
+* **`NAME`** - name of a test suite.
 ```cpp
-LUTSUIT(TestSuit) {
+LUTSUITE(TestSuite) {
    // Test Cases...
 }; //...
 ```
 ##
 
-**`LUTSUIT_RUN( NAME )`** - macro to run related test suit.
-* **`NAME`** - name of a test suit to run.
+**`LUTSUITE_RUN( NAME )`** - macro to run related test suite.
+* **`NAME`** - name of a test suite to run.
 ```cpp
 int main() {
-  LUTSUIT_RUN(TestSuit); // ...
+  LUTSUITE_RUN(TestSuite); // ...
   return 0;
 }
 ```
@@ -26,7 +26,7 @@ int main() {
 **`LUTCASE( NAME )`** - test case which should be nested in test execution space.
 * **`NAME`** - name of a test case.
 ```cpp
-LUTSUIT(TestSuit) {
+LUTSUITE(TestSuite) {
   // Test execution space
   LUTCASE(TestCase) {
      // ...
@@ -50,7 +50,7 @@ LUTCASE(TestCase) {
 ```
 ##
 
-**`ASSERT(FUNCTOR, ...)`** - lumbda-ut assertion. Can be in both test cases and suits.
+**`ASSERT(FUNCTOR, ...)`** - lumbda-ut assertion. Can be in both test cases and suites.
 * **`FUNCTOR`** - a callable entity(lambda, function pointer, functional object) which return lutResult.
 * **`...`** - list of args, which will be passed to **`FUNCTOR`**
 ```cpp

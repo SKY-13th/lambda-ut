@@ -2,7 +2,7 @@
 
 using namespace lambda_ut;
 
-LUTSUIT(TestSuit) {
+LUTSUITE(TestSuite) {
   LUTCASE(CaseA) {
     ASSERT(Eq, 100, 100);
   };
@@ -18,6 +18,6 @@ LUTSUIT(TestSuit) {
 };
 
 int main() {
-  LUTSUIT_RUN(TestSuit);
+  LUTSUITE_RUN(TestSuite);
   return 0;
 }
