@@ -9,7 +9,7 @@ namespace lambda_ut {
 namespace __lambda_ut {
   using namespace std;
   using lutResult = std::pair<string, bool>;
-  enum CaseState { START, SUCCESS, FAILURE };
+  enum CaseState { RUN, PASS, FAIL };
   struct TestAssertion : public logic_error {
     TestAssertion(string what)
         : logic_error(move(what)) {};
@@ -17,16 +17,16 @@ namespace __lambda_ut {
   void printCaseState(const string& caseName, CaseState state) {
     string stateStr;
     switch (state) {
-      case   START: stateStr = "[ START ] "; break;
-      case SUCCESS: stateStr = "[SUCCESS] "; break;
-      case FAILURE: stateStr = "[FAILURE] "; break;
+      case  RUN: stateStr = "[ RUN] "; break;
+      case PASS: stateStr = "[PASS] "; break;
+      case FAIL: stateStr = "[FAIL] "; break;
     } cout << stateStr << caseName << endl;
   }
   void printError(const string& caseName, const string& msg) {
-    cout << "> ERROR:\n" << msg << endl;
+    cout << "> ERROR: " << msg << "\n\n";
   }
-  void printSucceeded( size_t succeeded, size_t of ) {
-    cout << "          Succeeded " << succeeded << " of " << of << endl;
+  void printPassed(size_t passed, size_t ofCount) {
+    cout << "       Passed " << passed << " of " << ofCount << endl;
   }
   string formatErrorMsg( const string& file, const size_t line, const string& msg ) {
     stringstream out;
@@ -41,15 +41,15 @@ namespace __lambda_ut {
       state.emplace(result);
     }
     size_t subCasesPassed() const {
-      size_t succeeded = 0;
+      size_t passed = 0;
       for (const auto &s : state)
-        succeeded += s.second;
-      return succeeded;
+        passed += s.second;
+      return passed;
     }
   };
   template<typename Functor>
   lutResult operator<<( TestData& testData, Functor&& functor ) {
-    printCaseState( testData.name, START );
+    printCaseState( testData.name, RUN );
     bool result = true;
     try {
       functor( testData );
@@ -60,11 +60,11 @@ namespace __lambda_ut {
       printError( testData.name, "Unexpected exception!!!" );
       result = false;
     }
-    const size_t passed = testData.subCasesPassed();
-    const size_t size   = testData.state.size();
-    result &= passed == size;
-    printCaseState( testData.name, result ? SUCCESS : FAILURE );
-    if (passed < size) printSucceeded( passed, size );
+    const size_t passed  = testData.subCasesPassed();
+    const size_t count = testData.state.size();
+    result &= passed == count;
+    printCaseState( testData.name, result ? PASS : FAIL );
+    if (passed < count) printPassed(passed, count);
     return make_pair( testData.name, result );
   }
   template<typename Functor>
@@ -79,8 +79,7 @@ namespace __lambda_ut {
   }
   template <typename T>
   std::string toString(const T& val) {
-    stringstream out;
-    out << val;
+    stringstream out; out << val;
     return out.str();
   }
   template <>
