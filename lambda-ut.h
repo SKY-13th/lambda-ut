@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
+#include <functional>
 
 namespace lambda_ut {
 namespace __lambda_ut {
@@ -72,7 +73,7 @@ namespace __lambda_ut {
     return testData << functor;
   }
   template<typename Functor>
-  auto operator|( TestData&& testData, Functor&& functor ) {
+  const function<lutResult()> operator|( TestData&& testData, Functor&& functor ) {
     return [=]() mutable {
       return testData << functor;
     };
@@ -102,7 +103,7 @@ lutResult False(bool val) { return Eq(false, val); }
 } // namespace lambda_ut
 namespace __lut = lambda_ut::__lambda_ut;
 
-#define LUTSUIT(NAME) auto __lutSuit_##NAME = __lut::TestData(#NAME) | [&](__lut::TestData& __lutSpace)
+#define LUTSUIT(NAME) const auto __lutSuit_##NAME = __lut::TestData(#NAME) | [&](__lut::TestData& __lutSpace)
 
 #define LUTSUIT_RUN(NAME) __lutSuit_##NAME();
 
