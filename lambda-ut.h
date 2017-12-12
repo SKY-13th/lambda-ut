@@ -15,7 +15,9 @@ struct LutResult {
 namespace __lambda_ut {
 namespace {
   using namespace std;
+
   enum CaseState { RUN, PASS, FAIL };
+
   void printCaseState(const string& caseName, CaseState state) {
     string stateStr;
     switch (state) {
@@ -24,12 +26,15 @@ namespace {
       case FAIL: stateStr = "[FAIL] "; break;
     } cout << stateStr << caseName << endl;
   }
+
   void printError(const string& caseName, const string& msg) {
     cout << "> ERROR: " << msg << "\n\n";
   }
+
   void printPassed(size_t passed, size_t ofCount) {
     cout << "       Passed " << passed << " of " << ofCount << endl;
   }
+
   string formatErrorMsg(const string& file, const size_t line, const string& msg) {
     stringstream out;
     out << "In file: " << file << ":" << line << endl << msg;
@@ -40,13 +45,17 @@ namespace {
   struct TestAssertion : public logic_error {
     TestAssertion(string what) : logic_error(move(what)) {};
   };
+
   struct TestData {
     const string name;
     unordered_map<string, bool> state;
+
     TestData( string name ) : name( move( name ) ) {}
+
     bool operator += ( LutResult&& result ) {
       state.emplace(make_pair(result.data, result.value));
     }
+
     size_t subCasesPassed() const {
       size_t passed = 0;
       for (const auto &s : state)
@@ -54,6 +63,7 @@ namespace {
       return passed;
     }
   };
+
   template<typename Functor>
   struct SuiteExecutor{
     TestData testData;
@@ -65,6 +75,7 @@ namespace {
       return testData << functor;
     }
   };
+
   template<typename Functor>
   LutResult operator<<( TestData& testData, Functor&& functor ) {
     printCaseState( testData.name, RUN );
@@ -79,16 +90,18 @@ namespace {
       result = false;
     }
     const size_t passed  = testData.subCasesPassed();
-    const size_t count = testData.state.size();
+    const size_t count   = testData.state.size();
     result &= passed == count;
     printCaseState( testData.name, result ? PASS : FAIL );
     if (passed < count) printPassed(passed, count);
     return { result, testData.name };
   }
+
   template<typename Functor>
   LutResult operator<<( TestData&& testData, Functor &&functor ) {
     return testData << functor;
   }
+
   template<typename Functor>
   const auto operator|( TestData testData, Functor functor ) -> SuiteExecutor<Functor> {
     return SuiteExecutor<Functor>(
@@ -102,6 +115,7 @@ namespace {
     std::stringstream out; out << val;
     return out.str();
   }
+
   template <>
   std::string toString<bool>(const bool& val) {
     return val ? "true" : "false";
@@ -118,6 +132,7 @@ LutResult Eq(const A& expect, const B& actual) {
 LutResult True (bool val) { return Eq(true, val); }
 LutResult False(bool val) { return Eq(false, val); }
 } // namespace lambda_ut
+
 namespace __lut = lambda_ut::__lambda_ut;
 
 #define LUTSUITE(NAME) auto __LUTSUITEe_##NAME = __lut::TestData(#NAME) | [&](__lut::TestData& __lutSpace)
