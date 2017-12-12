@@ -4,7 +4,6 @@
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
-#include <functional>
 
 namespace lambda_ut {
 namespace __lambda_ut {
@@ -51,6 +50,17 @@ namespace {
     }
   };
   template<typename Functor>
+  struct SuiteExecutor{
+    TestData testData;
+    Functor functor;
+    SuiteExecutor( TestData&& testData, Functor&& functor )
+      : testData( testData )
+      , functor( functor ) {};
+    lutResult operator()() {
+      return testData << functor;
+    }
+  };
+  template<typename Functor>
   lutResult operator<<( TestData& testData, Functor&& functor ) {
     printCaseState( testData.name, RUN );
     bool result = true;
@@ -75,10 +85,9 @@ namespace {
     return testData << functor;
   }
   template<typename Functor>
-  const function<lutResult()> operator|( TestData&& testData, Functor&& functor ) {
-    return [=]() mutable {
-      return testData << functor;
-    };
+  const auto operator|( TestData testData, Functor functor ) -> SuiteExecutor<Functor> {
+    return SuiteExecutor<Functor>(
+      std::move(testData), std::move(functor) );
   }
 } // namespace __lambda_ut
 using __lambda_ut::lutResult;
@@ -107,7 +116,7 @@ lutResult False(bool val) { return Eq(false, val); }
 } // namespace lambda_ut
 namespace __lut = lambda_ut::__lambda_ut;
 
-#define LUTSUITE(NAME) const auto __LUTSUITEe_##NAME = __lut::TestData(#NAME) | [&](__lut::TestData& __lutSpace)
+#define LUTSUITE(NAME) auto __LUTSUITEe_##NAME = __lut::TestData(#NAME) | [&](__lut::TestData& __lutSpace)
 
 #define LUTSUITE_RUN(NAME) __LUTSUITEe_##NAME();
 
