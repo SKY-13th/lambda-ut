@@ -51,7 +51,7 @@ LUTCASE(TestCase) {
 ##
 
 **`ASSERT(FUNCTOR, ...)`** - lumbda-ut assertion. Can be in both test cases and suites.
-* **`FUNCTOR`** - a callable entity(lambda, function pointer, functional object) which return lutResult.
+* **`FUNCTOR`** - a callable entity(lambda, function pointer, functional object) which return LutResult.
 * **`...`** - list of args, which will be passed to **`FUNCTOR`**
 ```cpp
 // ...
@@ -59,18 +59,18 @@ ASSERT(Eq, 100, 100); // ...
 ```
 ##
 
-**`lutResult`** - result of assertion functor, represented by pair of string and boolean.
-* **`first`**  - string with info about assertion failure if failed.
-* **`second`** - actual result of assertion.
+**`LutResult`** - result of assertion functor, represented by pair of string and boolean.
+* **`value`** - actual result of assertion.
+* **`data`**  - string with info about assertion failure if failed.
 ##
 
 **`Eq`** - functor for assertion. Return whether 2 objects have same value.
 * **`expect`** - value which is expected
 * **`actual`** - actual value
-* **return**: **`lutResult`** with result of comparison
+* **return**: **`LutResult`** with result of comparison
 ##
 
 **`True/False`** - functor for assertion. Return whether boolean value is `true/false`
 * **`val`** - value for validation
-* **return**: **`lutResult`** with result of comparison
+* **return**: **`LutResult`** with result of comparison
 ##

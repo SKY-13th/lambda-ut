@@ -6,6 +6,12 @@
 #include <unordered_map>
 
 namespace lambda_ut {
+
+struct LutResult {
+  bool        value;
+  std::string data;
+};
+
 namespace __lambda_ut {
 namespace {
   using namespace std;
@@ -31,7 +37,6 @@ namespace {
   }
 } // namespace
   
-  using lutResult = std::pair<string, bool>;
   struct TestAssertion : public logic_error {
     TestAssertion(string what) : logic_error(move(what)) {};
   };
@@ -39,8 +44,8 @@ namespace {
     const string name;
     unordered_map<string, bool> state;
     TestData( string name ) : name( move( name ) ) {}
-    bool operator += ( lutResult&& result ) {
-      state.emplace(result);
+    bool operator += ( LutResult&& result ) {
+      state.emplace(make_pair(result.data, result.value));
     }
     size_t subCasesPassed() const {
       size_t passed = 0;
@@ -56,12 +61,12 @@ namespace {
     SuiteExecutor( TestData&& testData, Functor&& functor )
       : testData( testData )
       , functor( functor ) {};
-    lutResult operator()() {
+    LutResult operator()() {
       return testData << functor;
     }
   };
   template<typename Functor>
-  lutResult operator<<( TestData& testData, Functor&& functor ) {
+  LutResult operator<<( TestData& testData, Functor&& functor ) {
     printCaseState( testData.name, RUN );
     bool result = true;
     try {
@@ -78,10 +83,10 @@ namespace {
     result &= passed == count;
     printCaseState( testData.name, result ? PASS : FAIL );
     if (passed < count) printPassed(passed, count);
-    return make_pair( testData.name, result );
+    return { result, testData.name };
   }
   template<typename Functor>
-  lutResult operator<<( TestData&& testData, Functor &&functor ) {
+  LutResult operator<<( TestData&& testData, Functor &&functor ) {
     return testData << functor;
   }
   template<typename Functor>
@@ -90,7 +95,6 @@ namespace {
       std::move(testData), std::move(functor) );
   }
 } // namespace __lambda_ut
-using __lambda_ut::lutResult;
 
 namespace {
   template <typename T>
@@ -105,14 +109,14 @@ namespace {
 } // namespace
 
 template <typename A, typename B>
-lutResult Eq(const A& expect, const B& actual) {
+LutResult Eq(const A& expect, const B& actual) {
   const bool result = expect == actual;
-  return std::make_pair( result ? ""
+  return { result, result ? ""
       : "Expect: "   + toString(expect)
-      + ", Actual: " + toString(actual), result );
+      + ", Actual: " + toString(actual) };
 };
-lutResult True (bool val) { return Eq(true, val); }
-lutResult False(bool val) { return Eq(false, val); }
+LutResult True (bool val) { return Eq(true, val); }
+LutResult False(bool val) { return Eq(false, val); }
 } // namespace lambda_ut
 namespace __lut = lambda_ut::__lambda_ut;
 
@@ -125,4 +129,4 @@ const bool __lutCase_##NAME = __lutSpace += __lut::TestData(__lutSpace.name +'.'
 
 #define ASSERT(FUNCTOR, ...) {       \
 const auto r = FUNCTOR(__VA_ARGS__); \
-if(!r.second) throw __lut::TestAssertion(__lut::formatErrorMsg(__FILE__,__LINE__,r.first)); }
+if(!r.value) throw __lut::TestAssertion(__lut::formatErrorMsg(__FILE__,__LINE__,r.data)); }
